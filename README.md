@@ -66,6 +66,3 @@ Contribuições são bem-vindas. Abra uma issue para discutir mudanças maiores 
 Indique aqui a licença do projeto (por exemplo, MIT) ou remova esta seção se não for aplicável.
 
 ---
-
-Se quiser, eu posso: gerar um arquivo de configuração `.env.example`, adicionar instruções de deploy detalhadas ou criar um guia de contribuição mais completo.
-
