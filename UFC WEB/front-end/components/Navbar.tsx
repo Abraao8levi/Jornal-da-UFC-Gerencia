@@ -38,6 +38,8 @@ const Navbar: React.FC = () => {
           </div>
 
           <button
+            type="button"
+            aria-label="Toggle navigation menu"
             onClick={() => setIsOpen(!isOpen)}
             className="md:hidden text-gray-600 focus:outline-none p-2"
           >
