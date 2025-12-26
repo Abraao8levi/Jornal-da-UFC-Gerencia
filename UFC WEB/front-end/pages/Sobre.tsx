@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import brasaoUFC from '../assets/colorido-vertical-ufc.png';
 
 const Sobre: React.FC = () => {
@@ -103,18 +104,16 @@ const Sobre: React.FC = () => {
                <a href="mailto:comunicacao@ufc.br" className="ml-2 text-[#002B5C] font-black hover:underline transition-all">comunicacao@ufc.br</a>
             </div>
             
-            <a
-              href="/guia-do-colaborador"
+            <Link
+              to="/guia-colaborador"
               aria-label="Ver Guia do Colaborador"
               className="group relative inline-flex items-center justify-center px-10 py-4 font-black text-white bg-[#002B5C] rounded-2xl overflow-hidden transition-all hover:bg-indigo-900 shadow-xl"
-              target="_blank"
-              rel="noopener noreferrer"
             >
               <span className="relative flex items-center gap-2">
                 Ver Guia do Colaborador
                 <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
               </span>
-            </a>
+            </Link>
           </div>
         </div>
       </section>

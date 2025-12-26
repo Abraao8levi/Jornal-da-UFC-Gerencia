@@ -19,7 +19,7 @@ const noticiasMock: Noticia[] = [
     categoria: "Pesquisa",
     data: "2025-06-20",
     autor: "João Silva",
-    imagem: ""
+    imagem: "/assets/imagem3.png"
   },
   {
     id: 2,
@@ -29,7 +29,7 @@ const noticiasMock: Noticia[] = [
     categoria: "Eventos",
     data: "2025-10-18",
     autor: "Maria Oliveira",
-    imagem: ""
+    imagem: "/assets/imagem6.png"
   },
   {
     id: 3,
@@ -39,7 +39,7 @@ const noticiasMock: Noticia[] = [
     categoria: "Avisos",
     data: "2025-11-15",
     autor: "Carlos Mendes",
-    imagem: ""
+    imagem: "/assets/imagem1.png" 
   },
   {
     id: 4,
@@ -49,7 +49,7 @@ const noticiasMock: Noticia[] = [
     categoria: "Extensão",
     data: "2025-05-10",
     autor: "Ana Costa",
-    imagem: ""
+    imagem: "/assets/imagem5.png"
   },
   {
     id: 5,
@@ -59,7 +59,7 @@ const noticiasMock: Noticia[] = [
     categoria: "Pesquisa",
     data: "2025-11-05",
     autor: "Ricardo Lima",
-    imagem: ""
+    imagem: "/assets/imagem2.png"
   },
   {
     id: 6,
@@ -69,7 +69,7 @@ const noticiasMock: Noticia[] = [
     categoria: "Eventos",
     data: "2025-11-01",
     autor: "Bia Santos",
-    imagem: ""
+    imagem: "/assets/imagem4.png"
   }
 ];
 
