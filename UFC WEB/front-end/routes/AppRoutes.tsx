@@ -14,6 +14,8 @@ const AppRoutes: React.FC = () => {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/noticias" element={<Categoria />} />
+      {/* Página de categorias: Não implementada separadamente. Filtros estão na própria lista de notícias. */}
+      <Route path="/categorias" element={<Categoria />} />
       <Route path="/noticias/:id" element={<Noticia />} />
       <Route path="/sobre" element={<Sobre />} />
       <Route path="/guia-colaborador" element={<GuiaColaborador />} />

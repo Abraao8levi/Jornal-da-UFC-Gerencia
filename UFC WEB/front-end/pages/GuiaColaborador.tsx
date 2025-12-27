@@ -85,6 +85,7 @@ const GuiaColaborador: React.FC = () => {
   data: string; // AAAA-MM-DD
   autor: string;
   imagem: string;
+  campus?: string;
 }`}
                     </pre>
                 </div>
@@ -102,7 +103,8 @@ const GuiaColaborador: React.FC = () => {
   categoria: "Institucional",
   data: "2025-12-08",
   autor: "UFC Informa",
-  imagem: "/assets/guia-fontes.jpg"
+  imagem: "/assets/guia-fontes.jpg",
+  campus: "Benfica"
 }`}
                     </pre>
                 </div>
