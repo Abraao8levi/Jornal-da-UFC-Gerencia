@@ -1,19 +1,21 @@
 
 import React, { useState } from 'react';
+import CardNoticia from '../components/CardNoticia';
 import { useNoticias } from '../hooks/useNoticias';
 import { listarCategorias } from '../services/api';
-import CardNoticia from '../components/CardNoticia';
 
 const Categoria: React.FC = () => {
   const { filtrarNoticias, loading } = useNoticias();
   const [busca, setBusca] = useState('');
   const [categoriaAtiva, setCategoriaAtiva] = useState('Todos');
+  const [itensVisiveis, setItensVisiveis] = useState(9);
 
   const categorias = listarCategorias();
   const noticiasFiltradas = filtrarNoticias(categoriaAtiva, busca);
+  const noticiasExibidas = noticiasFiltradas.slice(0, itensVisiveis);
 
   return (
-    <div className="space-y-10">
+    <main className="container mx-auto px-6 py-8 space-y-10">
       <div className="text-center space-y-4">
         <h2 className="text-4xl font-extrabold text-gray-900">Todas as Notícias</h2>
         <p className="text-gray-500 max-w-xl mx-auto">Explore os acontecimentos da nossa universidade filtrando por categoria ou pesquisando termos específicos.</p>
@@ -62,9 +64,9 @@ const Categoria: React.FC = () => {
         </div>
       ) : (
         <>
-          {noticiasFiltradas.length > 0 ? (
+          {noticiasExibidas.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {noticiasFiltradas.map((noticia) => (
+              {noticiasExibidas.map((noticia) => (
                 <CardNoticia key={noticia.id} {...noticia} />
               ))}
             </div>
@@ -79,9 +81,20 @@ const Categoria: React.FC = () => {
               <p className="text-gray-400">Tente ajustar seus filtros ou termos de pesquisa.</p>
             </div>
           )}
+
+          {noticiasFiltradas.length > itensVisiveis && (
+            <div className="flex justify-center pt-8">
+              <button
+                onClick={() => setItensVisiveis((prev) => prev + 9)}
+                className="px-8 py-3 bg-white border border-indigo-200 text-indigo-600 font-bold rounded-xl hover:bg-indigo-50 hover:border-indigo-300 transition-all shadow-sm"
+              >
+                Carregar mais notícias
+              </button>
+            </div>
+          )}
         </>
       )}
-    </div>
+    </main>
   );
 };
 

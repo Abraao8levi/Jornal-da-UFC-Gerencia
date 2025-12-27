@@ -20,13 +20,13 @@ const Footer: React.FC = () => {
             <h4 className="text-white text-sm font-black uppercase tracking-[0.2em] mb-6 border-l-4 border-[#C89214] pl-3">Acesso Rápido</h4>
             <ul className="space-y-4 text-sm">
               <li>
-                <a href="https://www.ufc.br" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-[#C89214] transition-colors group">
+                <a href="https://www.ufc.br" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#C89214] transition-colors group">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500 group-hover:bg-[#C89214] transition-colors"></span>
                   Portal da UFC
                 </a>
               </li>
               <li>
-                <a href="https://si3.ufc.br/sigaa/" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-[#C89214] transition-colors group">
+                <a href="https://si3.ufc.br/sigaa/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#C89214] transition-colors group">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500 group-hover:bg-[#C89214] transition-colors"></span>
                   SIGAA
                 </a>
