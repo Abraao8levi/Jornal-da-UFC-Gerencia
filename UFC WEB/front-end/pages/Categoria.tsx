@@ -46,6 +46,7 @@ const Categoria: React.FC = () => {
           </div>
 
           <select
+            aria-label="Filtrar por campus"
             value={campusAtivo}
             onChange={(e) => setCampusAtivo(e.target.value)}
             className="px-6 py-4 bg-gray-50 border-none rounded-xl text-gray-900 focus:ring-2 focus:ring-indigo-500 font-medium cursor-pointer hover:bg-gray-100 transition-colors"

@@ -21,7 +21,7 @@ const mockNoticias: Noticia[] = [
     categoria: "Pesquisa",
     data: "2025-11-05",
     autor: "Mariana Costa",
-    imagem: "https://www.ufc.br/images/_images/noticias/2023/img_7015_730x487.jpg",
+    imagem: "/assets/imagem.png",
     campus: "Porangabuçu"
   },
   {
@@ -32,7 +32,7 @@ const mockNoticias: Noticia[] = [
     categoria: "Eventos",
     data: "2025-11-01",
     autor: "Lucas Martins",
-    imagem: "https://www.ufc.br/images/_images/noticias/2023/foto_noticia_semana_benfica.jpg",
+    imagem: "/assets/imagem1.jpg",
     campus: "Benfica"
   },
   {
@@ -43,7 +43,7 @@ const mockNoticias: Noticia[] = [
     categoria: "Avisos",
     data: "2025-10-28",
     autor: "Secretaria Acadêmica de Russas",
-    imagem: "https://www.ufc.br/images/_images/noticias/2023/campus_russas_ufc.jpg",
+    imagem: "/assets/imagem3.png",
     campus: "Russas"
   },
   {
@@ -54,7 +54,7 @@ const mockNoticias: Noticia[] = [
     categoria: "Extensão",
     data: "2025-09-15",
     autor: "Ana Clara Souza",
-    imagem: "https://www.ufc.br/images/_images/noticias/2023/campus_quixada.jpg",
+    imagem: "/assets/imagem4.jpeg",
     campus: "Quixadá"
   },
   {
@@ -65,7 +65,7 @@ const mockNoticias: Noticia[] = [
     categoria: "Institucional",
     data: "2025-08-20",
     autor: "UFC Informa",
-    imagem: "https://www.ufc.br/images/_images/noticias/2023/campus_crateus.jpg",
+    imagem: "/assets/imagem5.png",
     campus: "Crateús"
   },
   {
@@ -76,7 +76,7 @@ const mockNoticias: Noticia[] = [
     categoria: "Institucional",
     data: "2025-12-08",
     autor: "UFC Informa",
-    imagem: "/assets/guia-fontes.jpg",
+    imagem: "/assets/imagem6.png",
     campus: "Benfica"
   }
 ];
