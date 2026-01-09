@@ -26,11 +26,10 @@ const Navbar: React.FC = () => {
               <Link
                 key={link.name}
                 to={link.path}
-                className={`transition-colors duration-200 font-medium ${
-                  isActive(link.path)
+                className={`transition-colors duration-200 font-medium ${isActive(link.path)
                     ? 'text-indigo-700 border-b-2 border-indigo-700 h-14 flex items-center'
                     : 'text-gray-600 hover:text-indigo-600 h-14 flex items-center'
-                }`}
+                  }`}
               >
                 {link.name}
               </Link>
@@ -78,11 +77,10 @@ const Navbar: React.FC = () => {
               key={link.name}
               to={link.path}
               onClick={() => setIsOpen(false)}
-              className={`block px-3 py-2 rounded-md font-medium ${
-                isActive(link.path)
+              className={`block px-3 py-2 rounded-md font-medium ${isActive(link.path)
                   ? 'bg-indigo-600 text-white'
                   : 'text-gray-700 hover:bg-indigo-100'
-              }`}
+                }`}
             >
               {link.name}
             </Link>

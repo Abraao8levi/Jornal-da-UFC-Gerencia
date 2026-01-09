@@ -10,14 +10,15 @@ O projeto fornece uma plataforma simples e responsiva para criação e leitura d
 
 - Publicação e edição de notícias (backend).
 - Listagem e visualização por categoria (frontend).
+- Sistema de aprovação de notícias para editores.
 - Autenticação e autorização básicas.
-- Integração com banco de dados para persistência (Supabase / SQLite).
+- Integração com banco de dados para persistência (Supabase).
 
 ## Stack Tecnológica
 
-- **Backend**: Node.js (JavaScript/TypeScript)
-- **Frontend**: React + Vite + Tailwind CSS
-- **Banco de dados**: Supabase (Postgres gerenciado) e SQLite (local/desenvolvimento)
+- **Backend**: Node.js + Express + Supabase
+- **Frontend**: React + Vite + TypeScript
+- **Banco de dados**: Supabase (Postgres gerenciado)
 
 ## Estrutura do Repositório
 
@@ -31,18 +32,27 @@ O projeto fornece uma plataforma simples e responsiva para criação e leitura d
    git clone <url-do-repositorio>
    ```
 
-2. **Backend**:
+2. **Configurar Supabase**:
+   - Crie um projeto no [Supabase](https://supabase.com).
+   - Execute o script SQL em `UFC WEB/supabase_setup.sql` no SQL Editor do Supabase para criar a tabela e inserir dados de exemplo.
+
+3. **Backend**:
    - Entrar em `UFC WEB/back-end/` e instalar dependências:
      ```
      npm install
      ```
-   - Configurar variáveis de ambiente (conexão com banco, JWT, etc.).
+   - Copie o arquivo `.env.example` para `.env` e preencha com suas credenciais do Supabase:
+     ```
+     SUPABASE_URL=your_supabase_project_url
+     SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+     PORT=3000
+     ```
    - Executar servidor:
      ```
-     npm start
+     npm run dev
      ```
 
-3. **Frontend**:
+4. **Frontend**:
    - Entrar em `UFC WEB/front-end/` e instalar dependências:
      ```
      npm install

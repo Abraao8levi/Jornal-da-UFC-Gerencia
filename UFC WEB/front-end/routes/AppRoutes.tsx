@@ -8,6 +8,8 @@ import Home from '../pages/Home';
 import LoginPage from '../pages/LoginPage';
 import Noticia from '../pages/Noticia';
 import Sobre from '../pages/Sobre';
+import AdminPage from '../src/pages/AdminPage';
+import EditorPage from '../src/pages/EditorPage';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -21,8 +23,10 @@ const AppRoutes: React.FC = () => {
       <Route path="/guia-colaborador" element={<GuiaColaborador />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/cadastro" element={<CadastroPage />} />
+      <Route path="/admin" element={<AdminPage />} />
+      <Route path="/editor" element={<EditorPage />} />
     </Routes>
-  ); 
+  );
 };
 
 export default AppRoutes;
