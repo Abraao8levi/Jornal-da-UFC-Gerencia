@@ -13,6 +13,17 @@ export interface Noticia {
   status: 'rascunho' | 'pendente' | 'aprovado' | 'rejeitado';
 }
 
+export interface Comentario {
+  id: number;
+  noticia_id: number;
+  autor: string;
+  conteudo: string;
+  data: string; // ISO string
+  avatar?: string;
+  likes: number;
+  parent_id?: number | null;
+}
+
 /**
  * Retorna uma lista de todas as categorias de notícias disponíveis.
  * A categoria "Todos" é usada para limpar o filtro.
@@ -119,4 +130,57 @@ export const deletarNoticia = async (id: number): Promise<void> => {
     .eq('id', id);
 
   if (error) throw error;
+};
+
+/**
+ * Listar comentários de uma notícia
+ */
+export const listarComentarios = async (noticiaId: number): Promise<Comentario[]> => {
+  const { data, error } = await supabase
+    .from('comentarios')
+    .select('*')
+    .eq('noticia_id', noticiaId)
+    .order('data', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+};
+
+/**
+ * Criar novo comentário
+ */
+export const criarComentario = async (comentario: Omit<Comentario, 'id' | 'data'>): Promise<Comentario> => {
+  const { data, error } = await supabase
+    .from('comentarios')
+    .insert([comentario])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * Curtir comentário
+ */
+export const curtirComentario = async (id: number): Promise<Comentario> => {
+  // Primeiro, buscar o comentário atual
+  const { data: current, error: fetchError } = await supabase
+    .from('comentarios')
+    .select('likes')
+    .eq('id', id)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  // Incrementar likes
+  const { data, error } = await supabase
+    .from('comentarios')
+    .update({ likes: (current.likes || 0) + 1 })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 };

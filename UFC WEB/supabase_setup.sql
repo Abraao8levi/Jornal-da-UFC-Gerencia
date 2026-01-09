@@ -14,6 +14,20 @@ CREATE TABLE noticias (
   status TEXT NOT NULL DEFAULT 'rascunho' CHECK (status IN ('rascunho', 'pendente', 'aprovado', 'rejeitado'))
 );
 
+-- Criar tabela de comentários
+DROP TABLE IF EXISTS comentarios;
+
+CREATE TABLE comentarios (
+  id SERIAL PRIMARY KEY,
+  noticia_id INTEGER NOT NULL REFERENCES noticias(id) ON DELETE CASCADE,
+  parent_id INTEGER NULL REFERENCES comentarios(id) ON DELETE CASCADE,
+  autor TEXT NOT NULL,
+  conteudo TEXT NOT NULL,
+  data TIMESTAMP NOT NULL DEFAULT NOW(),
+  avatar TEXT,
+  likes INTEGER NOT NULL DEFAULT 0
+);
+
 -- Inserir dados de exemplo (já aprovados)
 INSERT INTO noticias (titulo, resumo, conteudo, categoria, data, autor, imagem, campus, status) VALUES
 ('UFC é destaque em ranking internacional de sustentabilidade', 'A Universidade Federal do Ceará (UFC) alcançou uma posição de destaque no UI GreenMetric World University Ranking 2024, que avalia as práticas de sustentabilidade em instituições de ensino superior em todo o mundo.', 'A Universidade Federal do Ceará (UFC) alcançou uma posição de destaque no UI GreenMetric World University Ranking 2024, que avalia as práticas de sustentabilidade em instituições de ensino superior em todo o mundo. A UFC ficou entre as 5 melhores universidades brasileiras e a primeira do Nordeste, refletindo os esforços contínuos em gestão ambiental, educação para a sustentabilidade e infraestrutura verde. A avaliação considera indicadores como ''Setting and Infrastructure'', ''Energy and Climate Change'', ''Waste'', ''Water'', ''Transportation'' e ''Education and Research''. O resultado é fruto de um trabalho coletivo envolvendo a administração superior, servidores, estudantes e a comunidade em geral, que têm se engajado em projetos como a coleta seletiva, o uso de energias renováveis e a promoção de eventos sobre consciência ambiental.', 'Institucional', '2025-10-22', 'Coordenadoria de Comunicação', '/assets/imagem2.png', 'Pici', 'aprovado'),
