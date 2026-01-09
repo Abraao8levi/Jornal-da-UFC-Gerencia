@@ -12,6 +12,7 @@ const Noticia: React.FC = () => {
   const navigate = useNavigate();
   const { noticias, loading, getRecentes } = useNoticias();
   const [noticia, setNoticia] = useState<NoticiaType | null>(null);
+  const [user, setUser] = useState<any>(null);
 
   const [comentario, setComentario] = useState('');
   const [ordenacao, setOrdenacao] = useState<'recentes' | 'antigos'>('antigos');
@@ -20,19 +21,18 @@ const Noticia: React.FC = () => {
   const [loadingComentarios, setLoadingComentarios] = useState(false);
   const [tempComentario, setTempComentario] = useState<ComentarioType | null>(null);
 
-  const formatarDataComentario = (dataISO: string): string => {
-    const data = new Date(dataISO);
-    const agora = new Date();
-    const diffMs = agora.getTime() - data.getTime();
-    const diffMin = Math.floor(diffMs / (1000 * 60));
-    const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const formatarDataComentario = (dataISO?: string): string => {
+    const data = dataISO ? new Date(dataISO) : new Date();
+    
+    if (isNaN(data.getTime())) return 'Data desconhecida';
 
-    if (diffMin < 1) return 'Agora mesmo';
-    if (diffMin < 60) return `Há ${diffMin} minuto${diffMin > 1 ? 's' : ''}`;
-    if (diffHoras < 24) return `Há ${diffHoras} hora${diffHoras > 1 ? 's' : ''}`;
-    if (diffDias < 7) return `Há ${diffDias} dia${diffDias > 1 ? 's' : ''}`;
-    return data.toLocaleDateString('pt-BR');
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(data);
   };
 
   const converterComentarioAPI = (apiComentario: ComentarioAPI): ComentarioType => ({
@@ -65,16 +65,18 @@ const Noticia: React.FC = () => {
     if (!comentario.trim() || !noticia) return;
 
     try {
-      const payload: any = {
+      const payload = {
         noticia_id: noticia.id,
-        autor: 'Usuário Anônimo', // Por enquanto anônimo
+        autor: user?.user_metadata?.name || user?.email || 'Usuário Anônimo',
         conteudo: comentario.trim(),
-        avatar: null,
+        avatar: user?.user_metadata?.avatar_url || null,
         likes: 0,
+        parent_id: replyTo || null
       };
-      if (replyTo) payload.parent_id = replyTo;
 
-      await criarComentario(payload);
+      const novoComentarioAPI = await criarComentario(payload);
+      const novoComentario = converterComentarioAPI(novoComentarioAPI);
+      setListaComentarios(prev => [novoComentario, ...prev]);
       setComentario('');
       setTempComentario(null);
       setReplyTo(null);
@@ -85,8 +87,11 @@ const Noticia: React.FC = () => {
 
   const handleLike = async (comentarioId: number) => {
     try {
-      await curtirComentario(comentarioId);
-      // O like será atualizado via real-time subscription
+      const comentarioAtualizadoAPI = await curtirComentario(comentarioId);
+      const comentarioAtualizado = converterComentarioAPI(comentarioAtualizadoAPI);
+      setListaComentarios(prev =>
+        prev.map(c => c.id === comentarioAtualizado.id ? comentarioAtualizado : c)
+      );
     } catch (error) {
       console.error('Erro ao curtir comentário:', error);
     }
@@ -118,7 +123,12 @@ const Noticia: React.FC = () => {
           (payload) => {
             const novoComentarioAPI = payload.new as ComentarioAPI;
             const novoComentario = converterComentarioAPI(novoComentarioAPI);
-              setListaComentarios(prev => [novoComentario, ...prev]);
+            
+            setListaComentarios(prev => {
+              // Evita duplicatas verificando se o ID já existe na lista
+              if (prev.some(c => c.id === novoComentario.id)) return prev;
+              return [novoComentario, ...prev];
+            });
           }
         )
         .on(
@@ -152,8 +162,8 @@ const Noticia: React.FC = () => {
       // Atualiza comentário temporário para UI otimista enquanto o usuário digita
       setTempComentario({
         id: -1,
-        autor: 'Você',
-        data: 'Agora mesmo',
+        autor: user?.user_metadata?.name || user?.email || 'Você',
+        data: formatarDataComentario(new Date().toISOString()),
         conteudo: texto,
         avatar: null,
         likes: 0,
@@ -162,6 +172,14 @@ const Noticia: React.FC = () => {
       });
     }
   };
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
 
   useEffect(() => {
     if (!loading) {
