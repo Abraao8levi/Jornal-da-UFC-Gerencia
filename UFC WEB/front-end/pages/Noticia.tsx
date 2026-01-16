@@ -1,46 +1,185 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import CardNoticia from '../components/CardNoticia';
 import Comentario, { ComentarioType } from '../components/Comentario';
 import { useNoticias } from '../hooks/useNoticias';
-import { Noticia as NoticiaType } from '../services/api';
+import { Comentario as ComentarioAPI, criarComentario, curtirComentario, listarComentarios, Noticia as NoticiaType } from '../services/api';
+import { supabase } from '../src/services/supabase';
 
 const Noticia: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { noticias, loading, getRecentes } = useNoticias();
   const [noticia, setNoticia] = useState<NoticiaType | null>(null);
+  const [user, setUser] = useState<any>(null);
 
   const [comentario, setComentario] = useState('');
   const [ordenacao, setOrdenacao] = useState<'recentes' | 'antigos'>('antigos');
   const MAX_CARACTERES = 600;
+  const [listaComentarios, setListaComentarios] = useState<ComentarioType[]>([]);
+  const [loadingComentarios, setLoadingComentarios] = useState(false);
+  const [tempComentario, setTempComentario] = useState<ComentarioType | null>(null);
 
-  // Mock de comentários para visualização
-  const [listaComentarios, setListaComentarios] = useState<ComentarioType[]>([
-    {
-      id: 1,
-      autor: "Ana Clara Souza",
-      data: "Há 2 horas",
-      conteudo: "Excelente iniciativa! Acredito que a divulgação científica é fundamental para aproximar a universidade da sociedade. Parabéns pela matéria.",
-      curtidas: 12,
-      avatar: null
-    },
-    {
-      id: 2,
-      autor: "Marcos Oliveira",
-      data: "Há 5 horas",
-      conteudo: "Gostaria de saber se haverá continuação sobre este tema na próxima semana. O impacto disso nos cursos de graduação será enorme.",
-      curtidas: 5
+  const formatarDataComentario = (dataISO?: string): string => {
+    const data = dataISO ? new Date(dataISO) : new Date();
+    
+    if (isNaN(data.getTime())) return 'Data desconhecida';
+
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(data);
+  };
+
+  const converterComentarioAPI = (apiComentario: ComentarioAPI): ComentarioType => ({
+    id: apiComentario.id,
+    autor: apiComentario.autor,
+    data: formatarDataComentario(apiComentario.data),
+    conteudo: apiComentario.conteudo,
+    avatar: apiComentario.avatar,
+    likes: apiComentario.likes,
+    parent_id: (apiComentario as any).parent_id ?? null,
+  });
+
+  const fetchComentarios = async (noticiaId: number) => {
+    setLoadingComentarios(true);
+    try {
+      const comentariosAPI = await listarComentarios(noticiaId);
+      const comentariosFormatados = comentariosAPI.map(converterComentarioAPI);
+      setListaComentarios(comentariosFormatados);
+    } catch (error) {
+      console.error('Erro ao buscar comentários:', error);
+    } finally {
+      setLoadingComentarios(false);
     }
-  ]);
+  };
+
+  const [replyTo, setReplyTo] = useState<number | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const handleComentarioSubmit = async () => {
+    if (!comentario.trim() || !noticia) return;
+
+    try {
+      const payload = {
+        noticia_id: noticia.id,
+        autor: user?.user_metadata?.name || user?.email || 'Usuário Anônimo',
+        conteudo: comentario.trim(),
+        avatar: user?.user_metadata?.avatar_url || null,
+        likes: 0,
+        parent_id: replyTo || null
+      };
+
+      const novoComentarioAPI = await criarComentario(payload);
+      const novoComentario = converterComentarioAPI(novoComentarioAPI);
+      setListaComentarios(prev => [novoComentario, ...prev]);
+      setComentario('');
+      setTempComentario(null);
+      setReplyTo(null);
+    } catch (error) {
+      console.error('Erro ao enviar comentário:', error);
+    }
+  };
+
+  const handleLike = async (comentarioId: number) => {
+    try {
+      const comentarioAtualizadoAPI = await curtirComentario(comentarioId);
+      const comentarioAtualizado = converterComentarioAPI(comentarioAtualizadoAPI);
+      setListaComentarios(prev =>
+        prev.map(c => c.id === comentarioAtualizado.id ? comentarioAtualizado : c)
+      );
+    } catch (error) {
+      console.error('Erro ao curtir comentário:', error);
+    }
+  };
+
+  const handleReply = (comentarioId: number, autor?: string) => {
+    setReplyTo(comentarioId);
+    const prefix = autor ? `@${autor} ` : '';
+    setComentario(prefix);
+    // Focus
+    setTimeout(() => textareaRef.current?.focus(), 50);
+  };
+
+  useEffect(() => {
+    if (noticia) {
+      fetchComentarios(noticia.id);
+
+      // Subscribe to real-time updates
+      const subscription = supabase
+        .channel(`comentarios-${noticia.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'comentarios',
+            filter: `noticia_id=eq.${noticia.id}`,
+          },
+          (payload) => {
+            const novoComentarioAPI = payload.new as ComentarioAPI;
+            const novoComentario = converterComentarioAPI(novoComentarioAPI);
+            
+            setListaComentarios(prev => {
+              // Evita duplicatas verificando se o ID já existe na lista
+              if (prev.some(c => c.id === novoComentario.id)) return prev;
+              return [novoComentario, ...prev];
+            });
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'comentarios',
+            filter: `noticia_id=eq.${noticia.id}`,
+          },
+          (payload) => {
+            const comentarioAtualizadoAPI = payload.new as ComentarioAPI;
+            const comentarioAtualizado = converterComentarioAPI(comentarioAtualizadoAPI);
+            setListaComentarios(prev =>
+              prev.map(c => c.id === comentarioAtualizado.id ? comentarioAtualizado : c)
+            );
+          }
+        )
+        .subscribe();
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [noticia]);
 
   const handleComentarioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const texto = e.target.value;
     if (texto.length <= MAX_CARACTERES) {
       setComentario(texto);
+      // Atualiza comentário temporário para UI otimista enquanto o usuário digita
+      setTempComentario({
+        id: -1,
+        autor: user?.user_metadata?.name || user?.email || 'Você',
+        data: formatarDataComentario(new Date().toISOString()),
+        conteudo: texto,
+        avatar: null,
+        likes: 0,
+        parent_id: replyTo ?? null,
+        pending: true,
+      });
     }
   };
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
 
   useEffect(() => {
     if (!loading) {
@@ -65,6 +204,16 @@ const Noticia: React.FC = () => {
   }
 
   const outrasNoticias = getRecentes(3).filter(n => n.id !== noticia.id);
+
+  // Ordenar comentários baseado na seleção
+  let comentariosOrdenados = ordenacao === 'recentes'
+    ? listaComentarios
+    : [...listaComentarios].reverse();
+
+  // Se houver um comentário temporário (UI otimista), exibi-lo no topo quando ordenação for "recentes"
+  if (tempComentario && ordenacao === 'recentes') {
+    comentariosOrdenados = [tempComentario, ...comentariosOrdenados];
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-12">
@@ -138,7 +287,14 @@ const Noticia: React.FC = () => {
           
           {/* Campo de Texto */}
           <div className="mb-4">
+            {replyTo && (
+              <div className="mb-2 text-sm text-gray-600 flex items-center justify-between">
+                <span>Respondendo ao comentário #{replyTo}</span>
+                <button className="text-xs text-indigo-600" onClick={() => { setReplyTo(null); setComentario(''); }}>Cancelar</button>
+              </div>
+            )}
             <textarea 
+              ref={textareaRef}
               className="w-full h-32 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
               placeholder="Digite seu comentário..."
               value={comentario}
@@ -154,7 +310,11 @@ const Noticia: React.FC = () => {
 
           {/* Botão Enviar */}
           <div className="flex justify-end">
-            <button className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+            <button
+              onClick={handleComentarioSubmit}
+              disabled={!comentario.trim()}
+              className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
               Enviar
             </button>
           </div>
@@ -192,11 +352,23 @@ const Noticia: React.FC = () => {
           </div>
 
           {/* Lista de Comentários */}
-          {listaComentarios.length > 0 ? (
+          {comentariosOrdenados.length > 0 ? (
             <div className="space-y-6">
-              {listaComentarios.map((c) => (
-                <Comentario key={c.id} {...c} />
-              ))}
+              {/* Render top-level comments and pass replies */}
+              {comentariosOrdenados
+                .filter(c => !c.parent_id)
+                .map((c) => {
+                  const replies = comentariosOrdenados.filter(r => r.parent_id === c.id);
+                  return (
+                    <Comentario
+                      key={c.id}
+                      {...c}
+                      replies={replies}
+                      onLike={c.id > 0 ? handleLike : undefined}
+                      onReply={handleReply}
+                    />
+                  );
+                })}
             </div>
           ) : (
             /* Placeholder - Sem Comentários */

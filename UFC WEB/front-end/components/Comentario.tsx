@@ -6,14 +6,20 @@ export interface ComentarioType {
   data: string;
   conteudo: string;
   avatar?: string | null;
-  curtidas?: number;
+  likes: number;
+  parent_id?: number | null;
+  replies?: ComentarioType[];
+  pending?: boolean;
+  onLike?: (id: number) => void;
+  onReply?: (id: number, autor?: string) => void;
+  isReply?: boolean;
 }
 
-const Comentario: React.FC<ComentarioType> = ({ autor, data, conteudo, avatar, curtidas = 0 }) => {
+const Comentario: React.FC<ComentarioType> = ({ id, autor, data, conteudo, avatar, likes = 0, onLike, onReply, replies = [], pending = false, isReply = false }) => {
   const inicial = autor.charAt(0).toUpperCase();
 
   return (
-    <div className="flex gap-4 p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
+    <div className={`flex gap-4 ${isReply ? 'p-4' : 'p-6'} ${pending ? 'opacity-80 bg-gray-50' : 'bg-white'} rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300`}>
       <div className="flex-shrink-0">
         {avatar ? (
           <img src={avatar} alt={autor} className="w-12 h-12 rounded-full object-cover border-2 border-indigo-50" />
@@ -31,15 +37,31 @@ const Comentario: React.FC<ComentarioType> = ({ autor, data, conteudo, avatar, c
         <p className="text-gray-600 leading-relaxed text-sm">{conteudo}</p>
         
         <div className="flex items-center gap-6 pt-2">
-            <button className="group flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-indigo-600 transition-colors">
+            <button
+              onClick={() => onLike?.(id)}
+              className="group flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-indigo-600 transition-colors"
+            >
                 <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
-                <span>{curtidas > 0 ? curtidas : 'Curtir'}</span>
+                <span>{likes > 0 ? likes : 'Curtir'}</span>
             </button>
-            <button className="text-xs font-medium text-gray-400 hover:text-indigo-600 transition-colors">
+            <button
+              onClick={() => onReply?.(id, autor)}
+              className="text-xs font-medium text-gray-400 hover:text-indigo-600 transition-colors"
+            >
                 Responder
             </button>
         </div>
       </div>
+      {/* Replies */}
+      {replies.length > 0 && (
+        <div className="w-full mt-4">
+          <div className="ml-16 space-y-3">
+            {replies.map(r => (
+              <Comentario key={r.id} {...r} onLike={onLike} onReply={onReply} isReply />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
